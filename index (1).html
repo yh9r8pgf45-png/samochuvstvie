@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Самочувствие после родов — экспресс-опрос</title>
+<meta name="description" content="Учебный прототип экспресс-диагностики эмоционального состояния женщин после родов">
+<style>
+:root{
+  --bg:#f5f2ec; --card:#ffffff; --ink:#22302f; --muted:#5d6d6b; --line:#d9d4c8;
+  --accent:#1d6b66; --accent-ink:#ffffff; --accent-soft:#e1efec;
+  --warn:#9a4a1a; --warn-soft:#fbeadc; --danger:#9b1c1c; --danger-soft:#fbe4e4; --ok-soft:#e8f1e4;
+  --shadow:0 1px 2px rgba(34,48,47,.06),0 6px 24px rgba(34,48,47,.06);
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#161c1c;--card:#1f2727;--ink:#e8eeec;--muted:#a3b3b0;--line:#34403f;
+    --accent:#58b5ac;--accent-ink:#0d1a19;--accent-soft:#233a38;--warn:#f0b38a;--warn-soft:#3a2a1d;
+    --danger:#f3a3a3;--danger-soft:#3b2222;--ok-soft:#24331f;--shadow:none}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px}
+.wrap.wide{max-width:860px}
+header.top{padding:18px 0 6px;color:var(--muted);font-size:14px;letter-spacing:.02em}
+main{padding:8px 0 24px}
+footer{padding:8px 0 40px;color:var(--muted);font-size:13px;line-height:1.5}
+h1,h2,h3{font-family:Georgia,"Iowan Old Style","Times New Roman",serif;font-weight:600;line-height:1.25;margin:0 0 .5em}
+h1{font-size:30px} h2{font-size:23px} h3{font-size:18px}
+p{margin:0 0 .9em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 20px;box-shadow:var(--shadow);margin-bottom:16px}
+.muted{color:var(--muted)} .small{font-size:14px}
+.btn{display:block;width:100%;min-height:54px;padding:14px 18px;border-radius:14px;border:1.5px solid var(--accent);background:var(--accent);color:var(--accent-ink);font:inherit;font-weight:600;cursor:pointer;text-align:center;text-decoration:none;margin-top:10px}
+.btn.secondary{background:transparent;color:var(--accent)}
+.btn.link{border-color:transparent;background:transparent;color:var(--muted);font-weight:500;min-height:44px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,.opt:focus-visible,input:focus-visible,textarea:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.progress{height:8px;background:var(--accent-soft);border-radius:99px;overflow:hidden;margin:6px 0 4px}
+.progress>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .25s}
+.meta{display:flex;justify-content:space-between;font-size:14px;color:var(--muted)}
+.q{font-family:Georgia,"Iowan Old Style",serif;font-size:21px;line-height:1.35;margin:18px 0 16px}
+.opt{display:block;width:100%;text-align:left;font:inherit;padding:14px 16px;margin:0 0 10px;border-radius:14px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;min-height:54px}
+.opt:hover{border-color:var(--accent)}
+.opt.sel{border-color:var(--accent);background:var(--accent-soft);font-weight:600}
+.opt .n{display:inline-block;min-width:1.6em;color:var(--accent);font-weight:700}
+.nav{display:flex;gap:10px;margin-top:6px}
+.nav .btn{margin-top:0}
+.tag{display:inline-block;font-size:13px;font-weight:600;padding:3px 10px;border-radius:99px;background:var(--accent-soft);color:var(--accent);margin-bottom:10px}
+.notice{border-radius:14px;padding:14px 16px;margin:0 0 16px;border:1px solid var(--line);background:var(--accent-soft)}
+.notice.warn{background:var(--warn-soft);border-color:var(--warn);color:var(--ink)}
+.notice.danger{background:var(--danger-soft);border-color:var(--danger)}
+.notice strong{display:block;margin-bottom:4px}
+ul.tips{padding-left:20px;margin:0 0 .8em} ul.tips li{margin-bottom:.4em}
+.slider{margin:0 0 20px}
+.slider label{display:flex;justify-content:space-between;font-weight:600;margin-bottom:6px}
+.slider output{color:var(--accent);min-width:3ch;text-align:right}
+input[type=range]{width:100%;height:36px;accent-color:var(--accent)}
+.ends{display:flex;justify-content:space-between;font-size:13px;color:var(--muted)}
+textarea{width:100%;min-height:90px;border-radius:12px;border:1.5px solid var(--line);padding:12px;font:inherit;background:var(--card);color:var(--ink);resize:vertical}
+.qrbox{display:flex;flex-direction:column;align-items:center;gap:10px;margin:10px 0}
+.qrbox canvas{width:min(260px,70vw);height:auto;border-radius:10px;background:#fff;image-rendering:pixelated}
+code.code{display:block;word-break:break-all;background:var(--accent-soft);padding:10px 12px;border-radius:10px;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:15px;margin:6px 0 14px}
+th,td{padding:9px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}
+td.num{white-space:nowrap;font-variant-numeric:tabular-nums}
+.chip{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:600;background:var(--ok-soft);white-space:nowrap}
+.chip.flag{background:var(--warn-soft);color:var(--warn)}
+.chip.crit{background:var(--danger-soft);color:var(--danger)}
+.chip.na{background:transparent;border:1px dashed var(--line);color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr;gap:12px}
+@media(min-width:700px){.grid2{grid-template-columns:1fr 1fr}}
+.sphere{border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.sphere.on{border-color:var(--warn);background:var(--warn-soft)}
+.sphere h3{margin:0 0 4px;font-size:16px;font-family:inherit}
+.hide{display:none!important}
+.sr{position:absolute;left:-9999px}
+@media print{
+  body{background:#fff;color:#000;font-size:12pt} header.top,footer,.noprint,.btn{display:none!important}
+  .card{box-shadow:none;border:1px solid #999;break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="wrap" id="topwrap"><header class="top">Самочувствие после родов · учебный прототип</header></div>
+<div class="wrap" id="app"><main id="main" aria-live="polite"></main>
+<footer>Это учебная разработка экспресс-опроса, а не медицинское изделие. Результат не является диагнозом и не заменяет консультацию специалиста. Ответы обрабатываются в вашем браузере, не отправляются на сервер и нигде не сохраняются.</footer></div>
+
+<script>/* Minimal QR Code encoder: byte mode, error-correction level M, versions 1-10. */
+const QR = (function () {
+  const EXP = new Array(512), LOG = new Array(256);
+  (function () {
+    let x = 1;
+    for (let i = 0; i < 255; i++) { EXP[i] = x; LOG[x] = i; x <<= 1; if (x & 256) x ^= 0x11d; }
+    for (let i = 255; i < 512; i++) EXP[i] = EXP[i - 255];
+  })();
+  const gmul = (a, b) => (a === 0 || b === 0 ? 0 : EXP[LOG[a] + LOG[b]]);
+  function rsGen(n) {
+    let g = [1];
+    for (let i = 0; i < n; i++) {
+      const ng = new Array(g.length + 1).fill(0);
+      for (let j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j + 1] ^= gmul(g[j], EXP[i]); }
+      g = ng;
+    }
+    return g;
+  }
+  function rsEncode(data, n) {
+    const g = rsGen(n), res = new Array(n).fill(0);
+    for (const d of data) {
+      const f = d ^ res[0];
+      res.shift(); res.push(0);
+      for (let i = 0; i < n; i++) res[i] ^= gmul(g[i + 1], f);
+    }
+    return res;
+  }
+  // [ecPerBlock, [[count, dataPerBlock], ...]] for level M
+  const BLK = {
+    1: [10, [[1, 16]]], 2: [16, [[1, 28]]], 3: [26, [[1, 44]]], 4: [18, [[2, 32]]], 5: [24, [[2, 43]]],
+    6: [16, [[4, 27]]], 7: [18, [[4, 31]]], 8: [22, [[2, 38], [2, 39]]], 9: [22, [[3, 36], [2, 37]]],
+    10: [26, [[4, 43], [1, 44]]]
+  };
+  const ALIGN = { 1: [], 2: [6, 18], 3: [6, 22], 4: [6, 26], 5: [6, 30], 6: [6, 34], 7: [6, 22, 38], 8: [6, 24, 42], 9: [6, 26, 46], 10: [6, 28, 50] };
+  const dataCap = v => BLK[v][1].reduce((s, [c, d]) => s + c * d, 0);
+
+  function bch(value, poly, bits) {
+    const msb = n => 31 - Math.clz32(n);
+    let v = value << bits;
+    const pl = msb(poly);
+    while (v && msb(v) >= pl) v ^= poly << (msb(v) - pl);
+    return v;
+  }
+  function encode(text) {
+    const bytes = Array.from(new TextEncoder().encode(text));
+    let ver = 0;
+    for (let v = 1; v <= 10; v++) { if (bytes.length <= dataCap(v) - 2 - (v > 9 ? 1 : 0)) { ver = v; break; } }
+    if (!ver) throw new Error('QR: too long');
+    const cap = dataCap(ver);
+    const bits = [];
+    const put = (val, n) => { for (let i = n - 1; i >= 0; i--) bits.push((val >> i) & 1); };
+    put(4, 4); put(bytes.length, ver > 9 ? 16 : 8);
+    bytes.forEach(b => put(b, 8));
+    put(0, Math.min(4, cap * 8 - bits.length));
+    while (bits.length % 8) bits.push(0);
+    const cw = [];
+    for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; cw.push(b); }
+    for (let pad = 0; cw.length < cap; pad++) cw.push(pad % 2 ? 0x11 : 0xec);
+    // blocks
+    const [ecn, groups] = BLK[ver];
+    const dblocks = [], eblocks = [];
+    let pos = 0;
+    for (const [cnt, dl] of groups) for (let i = 0; i < cnt; i++) {
+      const d = cw.slice(pos, pos + dl); pos += dl; dblocks.push(d); eblocks.push(rsEncode(d, ecn));
+    }
+    const out = [];
+    const maxd = Math.max(...dblocks.map(b => b.length));
+    for (let i = 0; i < maxd; i++) for (const b of dblocks) if (i < b.length) out.push(b[i]);
+    for (let i = 0; i < ecn; i++) for (const b of eblocks) out.push(b[i]);
+    const fbits = [];
+    out.forEach(b => { for (let i = 7; i >= 0; i--) fbits.push((b >> i) & 1); });
+    const rem = ver === 1 ? 0 : ver <= 6 ? 7 : 0;
+    for (let i = 0; i < rem; i++) fbits.push(0);
+
+    const N = 17 + 4 * ver;
+    const M = Array.from({ length: N }, () => new Array(N).fill(null)); // null = free
+    const set = (r, c, v) => { if (r >= 0 && r < N && c >= 0 && c < N) M[r][c] = v; };
+    const finder = (r0, c0) => {
+      for (let r = -1; r <= 7; r++) for (let c = -1; c <= 7; c++) {
+        const inside = r >= 0 && r <= 6 && c >= 0 && c <= 6;
+        const v = inside && (r === 0 || r === 6 || c === 0 || c === 6 || (r >= 2 && r <= 4 && c >= 2 && c <= 4));
+        set(r0 + r, c0 + c, v ? 1 : 0);
+      }
+    };
+    finder(0, 0); finder(0, N - 7); finder(N - 7, 0);
+    for (let i = 8; i < N - 8; i++) { set(6, i, i % 2 === 0 ? 1 : 0); set(i, 6, i % 2 === 0 ? 1 : 0); }
+    const al = ALIGN[ver];
+    for (const r of al) for (const c of al) {
+      if (M[r][c] !== null) continue; // overlaps finder
+      for (let dr = -2; dr <= 2; dr++) for (let dc = -2; dc <= 2; dc++)
+        set(r + dr, c + dc, Math.max(Math.abs(dr), Math.abs(dc)) !== 1 ? 1 : 0);
+    }
+    set(N - 8, 8, 1); // dark module
+    // reserve format areas
+    const reserved = M.map(row => row.map(v => v !== null));
+    const reserve = (r, c) => { if (M[r][c] === null) { M[r][c] = 0; } reserved[r][c] = true; };
+    for (let i = 0; i < 9; i++) { reserve(8, i); reserve(i, 8); }
+    for (let i = 0; i < 8; i++) { reserve(8, N - 1 - i); reserve(N - 1 - i, 8); }
+    if (ver >= 7) for (let i = 0; i < 6; i++) for (let j = 0; j < 3; j++) { reserve(i, N - 11 + j); reserve(N - 11 + j, i); }
+    // place data (zigzag)
+    const isData = Array.from({ length: N }, (_, r) => Array.from({ length: N }, (_, c) => !reserved[r][c]));
+    let bi = 0, up = true;
+    for (let c = N - 1; c > 0; c -= 2) {
+      if (c === 6) c--;
+      for (let k = 0; k < N; k++) {
+        const r = up ? N - 1 - k : k;
+        for (let dc = 0; dc < 2; dc++) {
+          const cc = c - dc;
+          if (isData[r][cc]) { M[r][cc] = bi < fbits.length ? fbits[bi] : 0; bi++; }
+        }
+      }
+      up = !up;
+    }
+    const maskFn = [
+      (r, c) => (r + c) % 2 === 0, (r, c) => r % 2 === 0, (r, c) => c % 3 === 0, (r, c) => (r + c) % 3 === 0,
+      (r, c) => (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0, (r, c) => ((r * c) % 2) + ((r * c) % 3) === 0,
+      (r, c) => (((r * c) % 2) + ((r * c) % 3)) % 2 === 0, (r, c) => (((r + c) % 2) + ((r * c) % 3)) % 2 === 0
+    ];
+    function build(mask) {
+      const G = M.map(row => row.slice());
+      for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (isData[r][c] && maskFn[mask](r, c)) G[r][c] ^= 1;
+      const fmt = (bch((0 << 3) | mask, 0x537, 10) | (((0 << 3) | mask) << 10)) ^ 0x5412; // level M = 00
+      const bit = i => (fmt >> i) & 1;
+      for (let i = 0; i <= 5; i++) G[i][8] = bit(i);
+      G[7][8] = bit(6); G[8][8] = bit(7); G[8][7] = bit(8);
+      for (let i = 9; i < 15; i++) G[8][14 - i] = bit(i);
+      for (let i = 0; i < 8; i++) G[8][N - 1 - i] = bit(i);
+      for (let i = 8; i < 15; i++) G[N - 15 + i][8] = bit(i);
+      G[N - 8][8] = 1;
+      if (ver >= 7) {
+        const vi = (ver << 12) | bch(ver, 0x1f25, 12);
+        for (let i = 0; i < 18; i++) {
+          const b = (vi >> i) & 1, r = Math.floor(i / 3), c = (i % 3) + N - 11;
+          G[r][c] = b; G[c][r] = b;
+        }
+      }
+      return G;
+    }
+    function penalty(G) {
+      let p = 0;
+      for (let pass = 0; pass < 2; pass++) {
+        for (let a = 0; a < N; a++) {
+          let run = 1;
+          for (let b = 1; b < N; b++) {
+            const cur = pass ? G[b][a] : G[a][b], prev = pass ? G[b - 1][a] : G[a][b - 1];
+            if (cur === prev) { run++; if (run === 5) p += 3; else if (run > 5) p++; } else run = 1;
+          }
+          const line = Array.from({ length: N }, (_, b) => (pass ? G[b][a] : G[a][b])).join('');
+          for (const pat of ['10111010000', '00001011101']) { let i = -1; while ((i = line.indexOf(pat, i + 1)) >= 0) p += 40; }
+        }
+      }
+      for (let r = 0; r < N - 1; r++) for (let c = 0; c < N - 1; c++) {
+        const v = G[r][c]; if (v === G[r][c + 1] && v === G[r + 1][c] && v === G[r + 1][c + 1]) p += 3;
+      }
+      let dark = 0; G.forEach(row => row.forEach(v => { dark += v; }));
+      p += Math.floor(Math.abs((dark * 100) / (N * N) - 50) / 5) * 10;
+      return p;
+    }
+    let best = null, bp = Infinity;
+    for (let m = 0; m < 8; m++) { const G = build(m); const p = penalty(G); if (p < bp) { bp = p; best = G; } }
+    return best;
+  }
+  function toCanvas(canvas, text, px, dark, light) {
+    const G = encode(text), N = G.length, quiet = 4, total = N + quiet * 2;
+    const scale = Math.max(2, Math.floor(px / total));
+    canvas.width = canvas.height = total * scale;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = light; ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = dark;
+    for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) if (G[r][c]) ctx.fillRect((c + quiet) * scale, (r + quiet) * scale, scale, scale);
+  }
+  return { encode, toCanvas };
+})();
+if (typeof module !== 'undefined') module.exports = QR;
+</script>
+<script>
+"use strict";
+/* ======================================================================
+   ТЕКСТЫ — их можно свободно править (всё, что видит пользователь).
+   Тексты самопомощи ниже — ЧЕРНОВЫЕ, заменить после завершения параграфа 2.3.
+   ====================================================================== */
+const T = {
+  homeTitle: "Как вы себя чувствуете после родов?",
+  homeLead: "Короткий анонимный опрос (около 5–7 минут) поможет понять, нужна ли вам поддержка психолога. Если ответы покажут, что стоит узнать больше, мы предложим ещё несколько вопросов.",
+  riskTitle: "Важно: вы отметили мысли о нанесении себе вреда",
+  // ФОРМУЛИРОВКА ДЛЯ ПУНКТА 10 EPDS — заменить на утверждённую научным руководителем
+  riskText: "Спасибо, что ответили честно. Такие мысли бывают после родов, и с ними не нужно оставаться одной. Пожалуйста, сегодня же скажите об этом врачу, акушерке или психологу отделения. Если вам кажется, что вы можете причинить себе вред прямо сейчас, позовите медицинский персонал или позвоните по номеру 112.",
+  riskTextShort: "Вы отметили мысли о нанесении себе вреда. Пожалуйста, сегодня же сообщите об этом врачу, акушерке или психологу отделения; при ощущении опасности позовите медицинский персонал или позвоните по номеру 112.",
+  epdsLow: "По вашим ответам выраженных признаков сниженного настроения и тревоги не обнаружено. Если самочувствие изменится, поговорите с психологом или врачом.",
+  epdsMid: "В ваших ответах есть признаки сниженного настроения или тревоги. Их стоит обсудить с психологом: поддержка в такой период — это обычная часть заботы о себе.",
+  epdsHigh: "В ваших ответах заметны выраженные признаки сниженного настроения и тревоги. Мы рекомендуем поговорить с психологом или врачом в ближайшее время.",
+  notDiagnosis: "Это результат экспресс-опроса, а не диагноз. Окончательные выводы делает только специалист.",
+  sphereNames: {
+    E: "Эмоциональный фон и тревога",
+    V: "Силы и самоорганизация",
+    R: "Способы справляться с переживаниями",
+    S: "Отношение к себе"
+  },
+  tips: {
+    E: ["Поделитесь переживаниями с близким человеком или психологом: сказать о тревоге вслух бывает уже облегчением.",
+        "Отдыхайте, когда спит малыш, и не стесняйтесь просить о помощи с бытом и уходом.",
+        "Если подавленное состояние или тревога не проходят больше двух недель, расскажите об этом врачу."],
+    V: ["Разбейте дела на маленькие шаги и выберите на день одно–два самых важных.",
+        "Не требуйте от себя всего сразу: силы после родов восстанавливаются постепенно.",
+        "Отмечайте даже небольшие сделанные дела."],
+    Rreap: ["Когда приходит тревожная мысль («я не справляюсь», «что-то не так»), спросите себя: «Что бы я сказала близкой подруге в такой ситуации?»",
+            "Попробуйте записать тревожную мысль и рядом — более спокойный и реалистичный вариант."],
+    Rsupp: ["Не скрывайте усталость и тревогу от близких: когда о чувствах знают, поддержка приходит быстрее.",
+            "Найдите одного человека, с которым можно быть откровенной."],
+    S: ["Вечером запишите три вещи, которые сегодня получились, даже самые маленькие.",
+        "Уверенность в уходе за малышом приходит с опытом: не получаться идеально с первого раза — нормально."]
+  },
+  tipsNote: "Это общие рекомендации по самопомощи, они не заменяют консультацию специалиста."
+};
+
+/* ======================== ДАННЫЕ МЕТОДИК ======================== */
+const EPDS = {
+  instr: "Выберите один из четырёх вариантов ответа, который лучше всего отражает ваше состояние за последние 7 дней (а не только за сегодняшний день).",
+  items: [
+    ["Я способна смеяться и видеть смешные стороны в происходящем", ["Как обычно","Сейчас немного меньше","Определённо меньше","Совсем не способна"], [0,1,2,3]],
+    ["Я смотрю в будущее с оптимизмом и радостным ожиданием", ["Как обычно","Меньше, чем обычно","Определённо меньше, чем обычно","Практически совсем нет"], [0,1,2,3]],
+    ["Я неоправданно виню себя, если что-то идёт не так", ["Да, в большинстве случаев","Да, иногда","Не очень часто","Нет, никогда"], [3,2,1,0]],
+    ["Я тревожусь и беспокоюсь без видимой причины", ["Нет, совсем нет","Очень редко","Да, иногда","Да, очень часто"], [0,1,2,3]],
+    ["Я испытываю чувство страха или паники без видимой причины", ["Да, очень часто","Да, иногда","Нет, не часто","Нет, совсем нет"], [3,2,1,0]],
+    ["Я чувствую, что не справляюсь с навалившимися делами", ["Да, большую часть времени я совершенно не справляюсь","Да, иногда я не справляюсь так хорошо, как обычно","Нет, в большинстве случаев я справляюсь достаточно хорошо","Нет, я справляюсь так же хорошо, как и раньше"], [3,2,1,0]],
+    ["Я чувствую себя такой несчастной, что у меня возникают проблемы со сном", ["Да, большую часть времени","Да, иногда","Не очень часто","Нет, совсем нет"], [3,2,1,0]],
+    ["Я чувствую грусть или тоску", ["Да, большую часть времени","Да, довольно часто","Не очень часто","Нет, совсем нет"], [3,2,1,0]],
+    ["Я чувствую себя такой несчастной, что плачу", ["Да, большую часть времени","Да, довольно часто","Только изредка","Нет, никогда"], [3,2,1,0]],
+    ["Ко мне приходили мысли о нанесении себе вреда", ["Да, довольно часто","Иногда","Очень редко","Никогда"], [3,2,1,0]]
+  ]
+};
+const ERQ = {
+  instr: "Ниже приведены утверждения о том, как вы управляете своими эмоциями. Оцените, насколько вы согласны с каждым утверждением.",
+  scale: ["Категорически не согласна","Не согласна","Скорее не согласна","Затрудняюсь ответить","Скорее согласна","Согласна","Полностью согласна"],
+  items: [
+    "Чтобы поднять себе настроение, я изменяю своё отношение к ситуации.",
+    "Для управления своими эмоциями я сдерживаю их внешние проявления.",
+    "Когда я сталкиваюсь со стрессовой ситуацией, я стараюсь думать о ней таким образом, чтобы сохранять спокойствие.",
+    "Для управления своими эмоциями я изменяю отношение к ситуации, в которой нахожусь.",
+    "Чтобы поднять себе настроение (испытать радость или удовольствие), я начинаю думать о чём-нибудь другом.",
+    "Когда я испытываю положительные эмоции, я слежу за тем, чтобы их не показывать.",
+    "Чтобы справиться с отрицательными эмоциями, я изменяю своё отношение к ситуации.",
+    "Я держу свои эмоции при себе.",
+    "Когда я испытываю отрицательные эмоции, я делаю всё, чтобы их не показывать.",
+    "Чтобы справиться с отрицательными эмоциями (такими как грусть или злость), я начинаю думать о чём-нибудь другом."
+  ],
+  reappraisal: [1,3,4,5,7,10], suppression: [2,6,8,9]
+};
+const VSK = {
+  instr: "Вам предлагаются 30 утверждений. Прочитайте каждое и ответьте, согласны ли вы с ним: «Да» или «Нет». Долго не задумывайтесь: правильных и неправильных ответов нет.",
+  items: [
+    "Если что-то не клеится, у меня нередко появляется желание бросить это дело.",
+    "Я не отказываюсь от своих планов и дел, даже если приходится выбирать между ними и приятной компанией.",
+    "При необходимости мне не трудно сдержать вспышку гнева.",
+    "Обычно я сохраняю спокойствие в ожидании опаздывающего к назначенному времени приятеля.",
+    "Меня трудно отвлечь от начатой работы.",
+    "Меня сильно выбивает из колеи физическая боль.",
+    "Я всегда стараюсь выслушать собеседника, не перебивая, даже если не терпится ему возразить.",
+    "Я всегда «гну» свою линию.",
+    "Если надо, я могу не спать ночь напролёт (например, работа, дежурство).",
+    "Мои планы слишком часто зависят от внешних обстоятельств.",
+    "Меня трудно рассердить.",
+    "Я обычно быстро теряю интерес к новому увлечению или делу, если оно требует значительных усилий.",
+    "Мне трудно заставить себя делать то, что нужно, если мне это неинтересно.",
+    "Я могу заниматься одним делом очень долго, усталость не заставит меня отвлечься.",
+    "Если я заболела, я сразу бросаю все дела и начинаю лечиться.",
+    "Я очень чувствительна к замечаниям, меня легко обидеть.",
+    "Я могу заставить себя сохранять спокойствие в любых обстоятельствах.",
+    "Даже при сильной усталости мне не трудно завершить начатое дело.",
+    "Мне трудно сдержать обещание, если оно идёт вразрез с моими интересами.",
+    "Я не чувствую усталости, если увлечена работой.",
+    "Мне трудно заставить себя делать зарядку или заниматься спортом регулярно.",
+    "Я часто не знаю, что делать от скуки.",
+    "Мне трудно сдерживать свои чувства, когда меня что-то раздражает.",
+    "Я всегда довожу начатое дело до конца.",
+    "Меня легко переубедить.",
+    "Мне трудно заставить себя сосредоточиться на каком-то одном деле.",
+    "Я чаще действую под влиянием минутного настроения, чем по плану.",
+    "Мне трудно довести до конца начатое дело, если на пути возникают серьёзные препятствия.",
+    "Меня легко вывести из себя.",
+    "Меня обычно сильно раздражает, когда «перед носом» закрывается дверь транспорта или лифта."
+  ],
+  // ключ ВСК по источнику методики (общая шкала 24, настойчивость 16, самообладание 13 пунктов)
+  keyAll:  { yes: [2,3,4,5,7,9,11,17,18,20,24,27], no: [1,6,10,13,14,16,21,22,25,28,29,30] },
+  keyNast: { yes: [2,5,9,11,17,18,20,24,27], no: [1,6,10,13,16,22,25] },
+  keySamo: { yes: [3,4,5,7,24,27], no: [13,14,16,21,28,29,30] }
+};
+const VSK_SUB_VERIFIED = true; // пока false — подшкалы помечаются в отчёте как «предварительно»
+const DES = {
+  instr: "Ниже перечислены слова, описывающие оттенки эмоциональных переживаний. Оцените, насколько каждое из них присуще вам в данный момент. Не задумывайтесь долго: самым точным обычно оказывается первое ощущение.",
+  scale: ["Совсем не чувствую","Едва заметно","Умеренно","Сильно","Очень сильно"],
+  items: [
+    "Внимательная, сосредоточенная","Заинтересованная, увлечённая","Собранная, вовлечённая",
+    "Радостная, счастливая","Весёлая, восторженная","Довольная, удовлетворённая",
+    "Удивлённая, изумлённая","Поражённая, ошеломлённая","Сбитая с толку, озадаченная",
+    "Грустная, унылая","Опечаленная, несчастная","Одинокая, брошенная",
+    "Гневная, яростная","Разгневанная, возмущённая","Раздражённая, сердитая",
+    "Испытывающая отвращение, омерзение","Противящаяся, брезгливая","Чувствующая тошноту, пресыщенная",
+    "Высокомерная, пренебрежительная","Презрительная, надменная","Насмешливая, пренебрегающая",
+    "Испуганная, паникующая","Боязливая, робкая","Тревожная, опасающаяся",
+    "Стыдящаяся, робеющая","Застенчивая, смущённая","Покрасневшая, чувствующая неловкость",
+    "Виноватая, раскаивающаяся","Разочарованная в себе, сожалеющая","Осуждающая себя, сокрушающаяся"
+  ]
+};
+const SELF = {
+  instr: "Любой человек оценивает свои качества. Уровень развития каждого качества можно представить в виде шкалы от 0 до 100: 0 — самое низкое развитие качества, 100 — самое высокое (идеал). Отметьте на каждой шкале, где вы находитесь сейчас. Передвиньте каждый ползунок.",
+  items: ["Ум, способности","Характер","Авторитет у окружающих","Умелые руки (практические навыки)","Внешность (привлекательность)","Уверенность в себе"]
+};
+
+/* ======================== ПОДСЧЁТ ======================== */
+const sum = a => a.reduce((s, x) => s + x, 0);
+function scoreVsk(ans, key) {
+  let s = 0;
+  key.yes.forEach(n => { if (ans[n - 1] === 1) s++; });
+  key.no.forEach(n => { if (ans[n - 1] === 0) s++; });
+  return s;
+}
+function calc(A) {
+  const R = { b2: !!A.b2 };
+  R.epdsItems = A.epds.map((o, i) => EPDS.items[i][2][o]);
+  R.epds = sum(R.epdsItems);
+  R.risk = R.epdsItems[9] > 0;
+  const e = A.erq.map(v => v + 1);
+  R.kp = sum(ERQ.reappraisal.map(n => e[n - 1]));
+  R.pe = sum(ERQ.suppression.map(n => e[n - 1]));
+  if (A.b2) {
+    R.vsk = scoreVsk(A.vsk, VSK.keyAll);
+    R.nast = scoreVsk(A.vsk, VSK.keyNast);
+    R.samo = scoreVsk(A.vsk, VSK.keySamo);
+    const d = A.des.map(v => v + 1);
+    R.pem = sum(d.slice(0, 9)); R.nem = sum(d.slice(9, 21)); R.tem = sum(d.slice(21, 30));
+    R.self = A.self.slice();
+    R.so = sum(A.self) / 6;
+  }
+  // категории
+  const C = {};
+  C.epds = R.epds <= 9 ? ["До 9 баллов", false] : R.epds <= 12 ? ["10–12 баллов", true] : ["13 баллов и выше", true];
+  C.kp = R.kp <= 18 ? ["Низкая", true] : R.kp <= 38 ? ["Средняя", false] : ["Высокая", false];
+  C.pe = R.pe <= 10 ? ["Низкое", false] : R.pe <= 21 ? ["Среднее", false] : ["Высокое", true];
+  if (A.b2) {
+    C.vsk = R.vsk <= 10 ? ["Низкий", true] : R.vsk <= 14 ? ["Средний", false] : ["Высокий", false];
+    C.nast = R.nast <= 6 ? ["Низкий", true] : R.nast <= 10 ? ["Средний", false] : ["Высокий", false];
+    C.samo = R.samo <= 5 ? ["Низкий", true] : R.samo <= 8 ? ["Средний", false] : ["Высокий", false];
+    C.pem = R.pem <= 19 ? ["Слабая", true] : R.pem <= 28 ? ["Умеренная", false] : R.pem <= 36 ? ["Выраженная", false] : ["Сильная", false];
+    C.nem = R.nem <= 14 ? ["Слабая", false] : R.nem <= 24 ? ["Умеренная", false] : R.nem <= 32 ? ["Выраженная", true] : ["Сильная", true];
+    C.tem = R.tem <= 11 ? ["Слабая", false] : R.tem <= 20 ? ["Умеренная", false] : R.tem <= 30 ? ["Выраженная", true] : ["Сильная", true];
+    C.self = R.self.map(v => v < 45 ? ["Заниженная", true] : v < 75 ? ["Реалистичная", false] : ["Завышенная", false]);
+    C.so = R.so < 45 ? ["Заниженная", true] : R.so < 75 ? ["Реалистичная", false] : ["Завышенная", false];
+  }
+  R.C = C;
+  // сферы
+  R.sph = { E: R.epds >= 10, R: C.kp[1] || C.pe[1], V: A.b2 ? C.vsk[1] : null, S: A.b2 ? C.so[1] : null };
+  R.reapLow = C.kp[1]; R.suppHigh = C.pe[1];
+  const vals = Object.values(R.sph).filter(v => v !== null);
+  R.nSph = vals.filter(Boolean).length;
+  R.group = R.nSph === 0 ? 1 : R.nSph === 1 ? 2 : R.nSph === 2 ? 3 : 4;
+  return R;
+}
+
+/* ======================== КОДИРОВАНИЕ ======================== */
+function pack(A) {
+  const bits = [];
+  const put = (v, n) => { for (let i = n - 1; i >= 0; i--) bits.push((v >> i) & 1); };
+  put(1, 4); put(A.b2 ? 1 : 0, 1);
+  A.epds.forEach(v => put(v, 2)); A.erq.forEach(v => put(v, 3));
+  if (A.b2) { A.des.forEach(v => put(v, 3)); A.vsk.forEach(v => put(v, 1)); A.self.forEach(v => put(v, 7)); }
+  while (bits.length % 8) bits.push(0);
+  let s = "";
+  for (let i = 0; i < bits.length; i += 8) { let b = 0; for (let j = 0; j < 8; j++) b = (b << 1) | bits[i + j]; s += String.fromCharCode(b); }
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+function unpack(code) {
+  try {
+    if (!/^[A-Za-z0-9_-]{8,80}$/.test(code)) return null;
+    const bin = atob(code.replace(/-/g, "+").replace(/_/g, "/") + "===".slice((code.length + 3) % 4 === 3 ? 0 : 0, (4 - code.length % 4) % 4));
+    const bits = [];
+    for (let i = 0; i < bin.length; i++) for (let j = 7; j >= 0; j--) bits.push((bin.charCodeAt(i) >> j) & 1);
+    let p = 0;
+    const get = n => { if (p + n > bits.length) throw new Error("short"); let v = 0; for (let i = 0; i < n; i++) v = (v << 1) | bits[p++]; return v; };
+    if (get(4) !== 1) return null;
+    const A = { b2: get(1) === 1 };
+    A.epds = Array.from({ length: 10 }, () => get(2));
+    A.erq = Array.from({ length: 10 }, () => get(3));
+    if (A.erq.some(v => v > 6)) return null;
+    if (A.b2) {
+      A.des = Array.from({ length: 30 }, () => get(3));
+      if (A.des.some(v => v > 4)) return null;
+      A.vsk = Array.from({ length: 30 }, () => get(1));
+      A.self = Array.from({ length: 6 }, () => get(7));
+      if (A.self.some(v => v > 100)) return null;
+    }
+    return A;
+  } catch (e) { return null; }
+}
+function linkFor(code) {
+  const base = location.href.split("#")[0];
+  return base + "#p=" + code;
+}
+
+/* ======================== ИНТЕРФЕЙС ======================== */
+const main = document.getElementById("main");
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v);
+  }
+  for (const c of kids.flat(Infinity)) { if (c == null || c === false) continue; e.append(c.nodeType ? c : document.createTextNode(String(c))); }
+  return e;
+}
+function show(...nodes) { main.replaceChildren(...nodes); window.scrollTo(0, 0); const f = main.querySelector("h1,h2,.q"); if (f) { f.setAttribute("tabindex", "-1"); } }
+function setWide(w) { document.getElementById("app").classList.toggle("wide", w); document.getElementById("topwrap").classList.toggle("wide", w); }
+
+let S;
+function reset() {
+  S = { A: { b2: false, epds: Array(10).fill(null), erq: Array(10).fill(null), vsk: Array(30).fill(null), des: Array(30).fill(null), self: Array(6).fill(null) }, steps: [], i: 0, riskDone: false };
+  S.steps = [{ k: "instr", m: "epds" }, ...Array.from({ length: 10 }, (_, i) => ({ k: "q", m: "epds", n: i })),
+    { k: "instr", m: "erq" }, ...Array.from({ length: 10 }, (_, i) => ({ k: "q", m: "erq", n: i })), { k: "between" }];
+}
+const BLOCK2 = () => [{ k: "instr", m: "vsk" }, ...Array.from({ length: 30 }, (_, i) => ({ k: "q", m: "vsk", n: i })),
+  { k: "instr", m: "des" }, ...Array.from({ length: 30 }, (_, i) => ({ k: "q", m: "des", n: i })),
+  { k: "instr", m: "self" }, { k: "sliders" }];
+
+function routeFromHash() {
+  const m = /^#p=([A-Za-z0-9_-]+)$/.exec(location.hash);
+  if (m) { const A = unpack(m[1]); if (A) { renderReport(A); return; } show(h("div", { class: "card" }, h("h2", {}, "Код не распознан"), h("p", {}, "Проверьте, что ссылка скопирована полностью."), h("button", { class: "btn", onclick: goHome }, "На главную"))); return; }
+  goHome();
+}
+function goHome() {
+  if (location.hash) history.replaceState(null, "", location.href.split("#")[0]);
+  setWide(false); reset(); renderHome();
+}
+function renderHome() {
+  show(
+    h("div", { class: "card" },
+      h("h1", {}, T.homeTitle), h("p", { class: "muted" }, T.homeLead),
+      h("button", { class: "btn", onclick: () => { S.i = 0; renderStep(); } }, "Начать опрос"),
+      h("p", { class: "small muted", style: "margin:14px 0 0" }, "Опрос анонимный: имя и другие данные не запрашиваются.")),
+    h("div", { class: "card" },
+      h("h3", {}, "Для психолога"),
+      h("p", { class: "small muted" }, "Полный результат можно открыть по коду или по QR-коду, который показывает пациентка после опроса."),
+      h("button", { class: "btn secondary", onclick: renderPsyEntry }, "Открыть отчёт по коду")));
+}
+function renderPsyEntry() {
+  setWide(false);
+  const ta = h("textarea", { placeholder: "Вставьте код или ссылку", "aria-label": "Код или ссылка" });
+  const msg = h("p", { class: "small", style: "color:var(--danger)" });
+  const open = () => {
+    let v = ta.value.trim(); const m = /#p=([A-Za-z0-9_-]+)/.exec(v); if (m) v = m[1];
+    const A = unpack(v); if (!A) { msg.textContent = "Код не распознан. Проверьте, что он скопирован полностью."; return; }
+    history.replaceState(null, "", location.href.split("#")[0] + "#p=" + v); renderReport(A);
+  };
+  show(h("div", { class: "card" }, h("h2", {}, "Отчёт для психолога"),
+    h("p", { class: "muted" }, "Вставьте код результата (или ссылку), либо отсканируйте QR-код камерой телефона — отчёт откроется сам."),
+    ta, msg,
+    h("button", { class: "btn", onclick: open }, "Открыть отчёт"),
+    h("button", { class: "btn secondary", onclick: () => { const A = sampleAnswers(); history.replaceState(null, "", location.href.split("#")[0] + "#p=" + pack(A)); renderReport(A); } }, "Показать пример отчёта"),
+    h("button", { class: "btn link", onclick: goHome }, "← На главную")));
+}
+function sampleAnswers() {
+  return { b2: true, epds: [1, 1, 1, 2, 1, 1, 1, 2, 1, 3], erq: [1, 4, 2, 4, 2, 4, 1, 5, 4, 2],
+    vsk: [1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1],
+    des: [1,1,2,1,1,1,0,0,1,2,2,1,1,1,2,0,0,0,0,0,0,2,1,3,2,1,1,2,2,1], self: [60, 40, 35, 50, 30, 38] };
+}
+
+function stepInfo(st) {
+  if (st.k === "instr") {
+    const M = { epds: ["Опрос 1 из 5", "Самочувствие за последние 7 дней", EPDS.instr], erq: ["Опрос 2 из 5", "Как вы справляетесь с эмоциями", ERQ.instr],
+      vsk: ["Опрос 3 из 5", "Самоорганизация и самообладание", VSK.instr], des: ["Опрос 4 из 5", "Ваши чувства сейчас", DES.instr], self: ["Опрос 5 из 5", "Оценка себя", SELF.instr] };
+    return M[st.m];
+  }
+}
+function renderStep() {
+  setWide(false);
+  const st = S.steps[S.i];
+  if (!st) return;
+  const back = () => { if (S.i > 0) { S.i--; renderStep(); } else goHome(); };
+  if (st.k === "instr") {
+    const [tag, title, text] = stepInfo(st);
+    show(h("div", { class: "card" }, h("span", { class: "tag" }, tag), h("h2", {}, title), h("p", {}, text),
+      h("button", { class: "btn", onclick: () => { S.i++; renderStep(); } }, "Продолжить"),
+      h("button", { class: "btn link", onclick: back }, "← Назад")));
+    return;
+  }
+  if (st.k === "q") { renderQuestion(st, back); return; }
+  if (st.k === "risk") {
+    show(h("div", { class: "card" }, h("div", { class: "notice danger" }, h("strong", {}, T.riskTitle), T.riskText),
+      h("button", { class: "btn", onclick: () => { S.i++; renderStep(); } }, "Понятно, продолжить"),
+      h("button", { class: "btn link", onclick: back }, "← Назад")));
+    return;
+  }
+  if (st.k === "between") { renderBetween(); return; }
+  if (st.k === "sliders") { renderSliders(back); return; }
+}
+function qData(st) {
+  if (st.m === "epds") { const it = EPDS.items[st.n]; return { total: 10, text: it[0] + ":", opts: it[1] }; }
+  if (st.m === "erq") return { total: 10, text: ERQ.items[st.n], opts: ERQ.scale, numbered: true };
+  if (st.m === "vsk") return { total: 30, text: VSK.items[st.n], opts: ["Нет", "Да"] };
+  if (st.m === "des") return { total: 30, text: DES.items[st.n], opts: DES.scale, numbered: true, lead: "Сейчас я чувствую себя:" };
+}
+function renderQuestion(st, back) {
+  const d = qData(st), cur = S.A[st.m][st.n];
+  const done = st.n + 1;
+  const opts = d.opts.map((label, idx) => h("button", { class: "opt" + (cur === idx ? " sel" : ""), onclick: () => choose(st, idx) },
+    d.numbered ? h("span", { class: "n" }, String(idx + 1)) : null, d.numbered ? " " : null, label));
+  show(h("div", { class: "card" },
+    h("div", { class: "meta" }, h("span", {}, "Вопрос " + done + " из " + d.total), h("span", {}, "")),
+    h("div", { class: "progress", role: "progressbar", "aria-valuemin": "0", "aria-valuemax": String(d.total), "aria-valuenow": String(done) }, h("i", { style: "width:" + (done / d.total * 100) + "%" })),
+    d.lead ? h("p", { class: "muted small", style: "margin:14px 0 0" }, d.lead) : null,
+    h("p", { class: "q" }, d.text), opts,
+    h("div", { class: "nav" }, h("button", { class: "btn link", onclick: back }, "← Назад"))));
+}
+function choose(st, idx) {
+  S.A[st.m][st.n] = idx;
+  let next = S.i + 1;
+  if (st.m === "epds" && st.n === 9 && EPDS.items[9][2][idx] > 0 && !S.riskDone) {
+    S.steps.splice(S.i + 1, 0, { k: "risk" }); S.riskDone = true;
+  }
+  setTimeout(() => { S.i = next; renderStep(); }, 160);
+}
+function renderBetween() {
+  const R = calc(Object.assign({}, S.A, { b2: false }));
+  const needMore = R.epds >= 10;
+  const go2 = () => { S.A.b2 = true; S.steps.push(...BLOCK2()); S.i++; renderStep(); };
+  const toResult = () => { S.A.b2 = false; renderResult(); };
+  const msg = R.epds <= 9 ? T.epdsLow : R.epds <= 12 ? T.epdsMid : T.epdsHigh;
+  show(h("div", { class: "card" },
+    h("h2", {}, "Первая часть пройдена"),
+    R.risk ? h("div", { class: "notice danger" }, h("strong", {}, T.riskTitle), T.riskTextShort) : null,
+    h("p", {}, msg),
+    needMore ? h("p", { class: "muted" }, "Чтобы лучше понять, в чём может помочь психолог, мы предлагаем ответить ещё на несколько вопросов (около 10 минут): о самоорганизации, текущих чувствах и отношении к себе.") : h("p", { class: "muted" }, "Если хотите, можно пройти расширенный опрос — это не обязательно."),
+    needMore ? h("button", { class: "btn", onclick: go2 }, "Продолжить опрос") : h("button", { class: "btn", onclick: toResult }, "Посмотреть результат"),
+    needMore ? h("button", { class: "btn secondary", onclick: toResult }, "Посмотреть результат сейчас") : h("button", { class: "btn secondary", onclick: go2 }, "Пройти расширенный опрос"),
+    h("p", { class: "small muted", style: "margin-top:14px" }, T.notDiagnosis)));
+}
+function renderSliders(back) {
+  const outs = [], inputs = [];
+  const btn = h("button", { class: "btn", disabled: "disabled", onclick: () => { S.A.self = inputs.map(i => +i.value); renderResult(); } }, "Показать результат");
+  const touched = Array(6).fill(false);
+  const rows = SELF.items.map((name, i) => {
+    const out = h("output", {}, "—"); outs.push(out);
+    const inp = h("input", { type: "range", min: "0", max: "100", step: "1", value: S.A.self[i] == null ? "50" : String(S.A.self[i]), "aria-label": name });
+    if (S.A.self[i] != null) { touched[i] = true; out.textContent = String(S.A.self[i]); }
+    inp.addEventListener("input", () => { touched[i] = true; out.textContent = inp.value; if (touched.every(Boolean)) btn.removeAttribute("disabled"); });
+    inputs.push(inp);
+    return h("div", { class: "slider" }, h("label", {}, h("span", {}, name), out), inp, h("div", { class: "ends" }, h("span", {}, "0 — самое низкое"), h("span", {}, "100 — самое высокое")));
+  });
+  if (touched.every(Boolean)) btn.removeAttribute("disabled");
+  show(h("div", { class: "card" }, h("h2", {}, "Оцените себя"), h("p", { class: "muted small" }, "Передвиньте каждый ползунок, чтобы продолжить."), rows, btn,
+    h("button", { class: "btn link", onclick: back }, "← Назад")));
+}
+
+function renderResult() {
+  setWide(false);
+  const A = S.A, R = calc(A), code = pack(A), link = linkFor(code);
+  const msg = R.epds <= 9 ? T.epdsLow : R.epds <= 12 ? T.epdsMid : T.epdsHigh;
+  const parts = [];
+  parts.push(h("div", { class: "card" }, h("h2", {}, "Ваш результат"),
+    R.risk ? h("div", { class: "notice danger" }, h("strong", {}, T.riskTitle), T.riskTextShort) : null,
+    h("p", {}, msg), h("p", { class: "small muted" }, T.notDiagnosis)));
+  const flagged = [];
+  if (R.sph.E) flagged.push(["E", T.tips.E]);
+  if (R.sph.V) flagged.push(["V", T.tips.V]);
+  if (R.sph.R) flagged.push(["R", [].concat(R.reapLow ? T.tips.Rreap : [], R.suppHigh ? T.tips.Rsupp : [])]);
+  if (R.sph.S) flagged.push(["S", T.tips.S]);
+  if (flagged.length) {
+    parts.push(h("div", { class: "card" }, h("h2", {}, "На что стоит обратить внимание"),
+      flagged.map(([k, tips]) => h("div", { class: "sphere on", style: "margin-bottom:10px" }, h("h3", {}, T.sphereNames[k]), h("ul", { class: "tips" }, tips.map(t => h("li", {}, t))))),
+      h("p", { class: "small muted" }, T.tipsNote)));
+  } else {
+    parts.push(h("div", { class: "card" }, h("h2", {}, "Что можно сделать"),
+      h("p", {}, "По вашим ответам вы справляетесь с эмоциями и нагрузкой в пределах обычного. Берегите силы, отдыхайте, когда есть возможность, и не стесняйтесь просить о помощи."), h("p", { class: "small muted" }, T.tipsNote)));
+  }
+  const cv = h("canvas", { "aria-label": "QR-код с результатом для психолога", role: "img" });
+  parts.push(h("div", { class: "card" }, h("h2", {}, "Показать психологу"),
+    h("p", { class: "muted" }, "Психолог увидит полный результат. Покажите ему QR-код или передайте ссылку. В коде нет имени, только ваши ответы, поэтому показывайте его лишь тому, кому хотите передать результат."),
+    h("div", { class: "qrbox" }, cv),
+    h("code", { class: "code" }, link),
+    h("button", { class: "btn secondary", onclick: (e) => { const b = e.currentTarget; const done = () => { b.textContent = "Ссылка скопирована"; setTimeout(() => b.textContent = "Скопировать ссылку", 2000); }; if (navigator.clipboard) navigator.clipboard.writeText(link).then(done, () => { }); } }, "Скопировать ссылку"),
+    h("button", { class: "btn", onclick: () => { history.replaceState(null, "", "#p=" + code); renderReport(A); } }, "Открыть отчёт психолога (демонстрация)"),
+    h("button", { class: "btn link", onclick: goHome }, "Начать заново")));
+  show(...parts);
+  try { QR.toCanvas(cv, link, 520, "#000000", "#ffffff"); } catch (e) { cv.replaceWith(h("p", { class: "small" }, "QR-код недоступен, используйте ссылку.")); }
+}
+
+/* ---------- Отчёт для психолога ---------- */
+function chip(c, crit) { if (!c) return h("span", { class: "chip na" }, "не оценивалось"); return h("span", { class: "chip" + (crit ? " crit" : c[1] ? " flag" : "") }, c[0] + (c[1] ? " ●" : "")); }
+function renderReport(A) {
+  setWide(true);
+  const R = calc(A), C = R.C, b2 = A.b2;
+  const row = (m, sc, val, max, cat, note) => h("tr", {}, h("td", {}, m), h("td", {}, sc, note ? h("div", { class: "small muted" }, note) : null), h("td", { class: "num" }, val == null ? "—" : String(val) + (max ? " / " + max : "")), h("td", {}, cat));
+  const rows = [
+    row("EPDS", "Сумма баллов", R.epds, 30, chip(C.epds)),
+    row("EPDS", "Пункт 10 (самоповреждение)", R.epdsItems[9], 3, R.risk ? chip(["Любой ответ, кроме «Никогда»", true], true) : chip(["Никогда", false])),
+    row("ERQ", "Когнитивная переоценка", R.kp, 42, chip(C.kp), "низкая: 6–18 баллов; средняя: 19–38; высокая: 39–42"),
+    row("ERQ", "Подавление экспрессии", R.pe, 28, chip(C.pe), "низкое: 4–10 баллов; среднее: 11–21; высокое: 22–28")
+  ];
+  if (b2) {
+    const pre = VSK_SUB_VERIFIED ? null : "ключ подшкалы уточняется";
+    rows.push(
+      row("ВСК", "Общий индекс", R.vsk, 24, chip(C.vsk)),
+      row("ВСК", "Настойчивость", R.nast, 16, chip(C.nast), pre),
+      row("ВСК", "Самообладание", R.samo, 13, chip(C.samo), pre),
+      row("ШДЭ", "Позитивные эмоции (ПЭМ)", R.pem, 45, chip(C.pem)),
+      row("ШДЭ", "Острые негативные эмоции (НЭМ)", R.nem, 60, chip(C.nem)),
+      row("ШДЭ", "Тревожно-депрессивные эмоции (ТЭМ)", R.tem, 45, chip(C.tem)));
+    SELF.items.forEach((n, i) => rows.push(row("Дембо — Рубинштейн", "Самооценка: " + n.replace(/ \(.*\)/, "").toLowerCase(), R.self[i], 100, chip(C.self[i]))));
+    rows.push(row("Дембо — Рубинштейн", "Среднее по шести шкалам", R.so.toFixed(1).replace(".", ","), 100, chip(C.so)));
+  }
+  const sph = [
+    ["E", "Эмоциональная", "EPDS ≥ 10", R.sph.E, b2 ? [C.tem[1] && "ТЭМ выражена или сильна (≥ 21): тревожно-депрессивные переживания", C.nem[1] && "НЭМ выражена или сильна (≥ 25): острые негативные переживания", C.pem[1] && "ПЭМ слабая (≤ 19): дефицит положительных эмоций"] : []],
+    ["V", "Волевая", "общий индекс ВСК — низкий уровень (≤ 10)", R.sph.V, b2 ? [C.nast[1] && "низкая настойчивость (≤ 6)", C.samo[1] && "низкое самообладание (≤ 5)"] : []],
+    ["R", "Регуляция эмоций", "когнитивная переоценка — низкий уровень (≤ 18) или подавление экспрессии — высокий уровень (≥ 22)", R.sph.R, [R.reapLow && "недостаточная когнитивная переоценка", R.suppHigh && "привычное подавление экспрессии"]],
+    ["S", "Самоотношение", "среднее значение самооценки < 45", R.sph.S, []]
+  ];
+  const sphereCards = sph.map(([k, name, crit, on, refine]) => h("div", { class: "sphere" + (on ? " on" : "") },
+    h("h3", {}, name + ": " + (on === null ? "не оценивалось" : on ? "вероятная мишень для последующей работы" : "признаков нет")),
+    h("div", { class: "small muted" }, "Критерий: " + crit),
+    on && refine.filter(Boolean).length ? h("ul", { class: "tips", style: "margin:6px 0 0" }, refine.filter(Boolean).map(t => h("li", {}, t))) : null));
+  const gtxt = ["1. Признаки не выявлены", "2. Одна сфера", "3. Две сферы", "4. Три–четыре сферы"][R.group - 1];
+  show(
+    h("div", { class: "noprint", style: "margin:4px 0 12px" }, h("button", { class: "btn link", style: "width:auto;display:inline-block;margin:0", onclick: goHome }, "← На главную")),
+    h("div", { class: "card" }, h("span", { class: "tag" }, "Отчёт для психолога"), h("h1", {}, "Результаты экспресс-опроса"),
+      R.risk ? h("div", { class: "notice danger" }, h("strong", {}, "Критический маркер: EPDS, пункт 10"), "Отмечены мысли о нанесении себе вреда. Требуется немедленная оценка ситуации специалистом независимо от суммарного балла.") : null,
+      !b2 ? h("div", { class: "notice warn" }, h("strong", {}, "Оценка неполная"), "Пройдена только первая часть опроса (EPDS и ERQ). Волевая сфера и самоотношение не оценивались.") : null,
+      h("p", { class: "muted small" }, "Знак ● отмечает значение, которое по критериям исследования служит основанием для выделения мишени. Это результат скрининга, а не диагноз.")),
+    h("div", { class: "card" }, h("h2", {}, "Баллы и категории"),
+      h("div", { style: "overflow-x:auto" }, h("table", {}, h("thead", {}, h("tr", {}, h("th", {}, "Методика"), h("th", {}, "Показатель"), h("th", {}, "Баллы"), h("th", {}, "Категория"))), h("tbody", {}, rows)))),
+    h("div", { class: "card" }, h("h2", {}, "Мишени психологической коррекции"),
+      h("div", { class: "grid2" }, sphereCards),
+      h("p", { style: "margin-top:14px" }, "Число сфер с вероятными мишенями: ", h("strong", {}, String(R.nSph)), b2 ? "" : " (учтены только оценённые сферы)", ". Группа: ", h("strong", {}, gtxt), "."),
+      !VSK_SUB_VERIFIED && b2 ? h("p", { class: "small muted" }, "Уточняющие мишени по подшкалам ВСК (настойчивость, самообладание) предварительные: ключ подшкал проходит сверку.") : null,
+      h("p", { class: "small muted" }, "Уровни по ERQ определены по сумме баллов: когнитивная переоценка — низкая 6–18, средняя 19–38, высокая 39–42; подавление экспрессии — низкое 4–10, среднее 11–21, высокое 22–28.")),
+    h("div", { class: "card noprint" }, h("button", { class: "btn secondary", onclick: () => window.print() }, "Печать / сохранить в PDF")));
+}
+
+window.PPD = { calc, pack, unpack, sampleAnswers };
+window.addEventListener("hashchange", routeFromHash);
+reset(); routeFromHash();
+</script>
+</body>
+</html>
